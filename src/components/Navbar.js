@@ -1,9 +1,15 @@
 import React, { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate(); 
+
+  const handleLogout = () => {
+    logout(); 
+    navigate("/login"); 
+  };
 
   return (
     <nav className="bg-gray-800 text-white p-4 flex justify-between">
@@ -13,9 +19,14 @@ const Navbar = () => {
       <div>
         {user ? (
           <>
-            <span>{user.name}</span>
+            <Link
+              to="/taskform"
+              className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded"
+            >
+              TaskForm
+            </Link>
             <button
-              onClick={logout}
+              onClick={handleLogout} 
               className="ml-4 bg-red-500 hover:bg-red-700 text-white py-1 px-2 rounded"
             >
               Logout

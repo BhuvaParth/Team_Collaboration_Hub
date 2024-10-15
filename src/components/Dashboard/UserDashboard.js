@@ -1,46 +1,85 @@
-import React, { useEffect, useState } from "react";
-import TaskForm from "../Tasks/TaskForm";
-import TaskItem from "../Tasks/TaskItem";
+import React, { useState } from 'react';
+import { useTasks } from '../Tasks/TaskProvider';
+import { useNavigate } from 'react-router-dom'; 
 
-const UserDashboard = () => {
-  const [tasks, setTasks] = useState([]);
+export default function UserDashboard() {
+  const { tasks, deleteTask } = useTasks(); 
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState(''); 
 
-  useEffect(() => {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    setTasks(savedTasks);
-  }, []);
-
-  const addTask = (newTask) => {
-    const updatedTasks = [...tasks, newTask];
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
   };
 
-  const deleteTask = (taskId) => {
-    const updatedTasks = tasks.filter((task) => task.id !== taskId);
-    setTasks(updatedTasks);
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+  const filteredTasks = tasks.filter((task) => {
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    return (
+      task.title.toLowerCase().includes(lowerCaseQuery) ||
+      task.description.toLowerCase().includes(lowerCaseQuery) ||
+      task.status.toLowerCase().includes(lowerCaseQuery) ||
+      task.priority.toLowerCase().includes(lowerCaseQuery)
+    );
+  });
+
+  const handleDelete = (taskId) => {
+    deleteTask(taskId);
   };
 
-  const updateTask = (taskId) => {
+  const handleEdit = (task) => {
+    navigate('/edit-task', { state: { task } });
   };
 
   return (
-    <div>
-      <h2 className="text-2xl mb-4">User Dashboard</h2>
-      <TaskForm addTask={addTask} />
-      <div>
-        {tasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            deleteTask={deleteTask}
-            updateTask={updateTask}
-          />
-        ))}
-      </div>
+    <div className="p-4">
+      <h2 className="text-xl mb-4">User Dashboard</h2>
+      <input
+        type="text"
+        placeholder="Search tasks by title, description, status, or priority..."
+        value={searchQuery}
+        onChange={handleSearchChange}
+        className="border p-2 mb-4 w-full"
+      />
+      {filteredTasks.length === 0 ? (
+        <p>No tasks available.</p>
+      ) : (
+        <table className="min-w-full bg-white border border-gray-300 text-center">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="py-2 px-4 border">Title</th>
+              <th className="py-2 px-4 border">Description</th>
+              <th className="py-2 px-4 border">Due Date</th>
+              <th className="py-2 px-4 border">Status</th>
+              <th className="py-2 px-4 border">Priority</th>
+              <th className="py-2 px-4 border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTasks.map((task) => (
+              <tr key={task.id} className="hover:bg-gray-100">
+                <td className="py-2 px-4 border">{task.title}</td>
+                <td className="py-2 px-4 border">{task.description}</td>
+                <td className="py-2 px-4 border">{task.dueDate}</td>
+                <td className="py-2 px-4 border">{task.status}</td>
+                <td className="py-2 px-4 border">{task.priority}</td>
+                <td className="py-2 px-4 border">
+                  <button
+                    onClick={() => handleEdit(task)}
+                    className="text-blue-500 hover:underline mr-2"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(task.id)}
+                    className="text-red-500 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
-};
-
-export default UserDashboard;
+}

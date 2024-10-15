@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
   const { login } = useContext(AuthContext);
@@ -61,6 +61,12 @@ const Login = () => {
           Login
         </button>
       </form>
+      <p className="mt-4 text-center">
+        Don't have an account?{" "}
+        <Link to="/register" className="text-blue-500 hover:text-blue-700">
+          Register here
+        </Link>
+      </p>
     </div>
   );
 };
